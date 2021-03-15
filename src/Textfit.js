@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import shallowEqual from './utils/shallowEqual';
 import series from './utils/series';
 import whilst from './utils/whilst';
@@ -20,19 +19,6 @@ function assertElementFitsHeight(el, height) {
 function noop() {}
 
 export default class TextFit extends React.Component {
-    static propTypes = {
-        children: PropTypes.node,
-        text: PropTypes.string,
-        min: PropTypes.number,
-        max: PropTypes.number,
-        mode: PropTypes.oneOf([
-            'single', 'multi'
-        ]),
-        forceSingleModeWidth: PropTypes.bool,
-        throttle: PropTypes.number,
-        onReady: PropTypes.func
-    }
-
     static defaultProps = {
         min: 1,
         max: 100,

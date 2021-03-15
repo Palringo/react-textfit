@@ -8,9 +8,6 @@
  * @params {Array} tasks An array containing functions to run, each function is passed a callback(err, result) which it must call on completion with an error err (which can be null) and an optional result value.
  * @params {Function} callback(err, results) - An optional callback to run once all the functions have completed. This function gets a results array containing all the result arguments passed to the task callbacks.
  */
-
-import process from 'process';
-
 export default function series(tasks, cb) {
     const results = [];
     let current = 0;
@@ -20,7 +17,7 @@ export default function series(tasks, cb) {
         function end() {
             if (cb) cb(err, results);
         }
-        if (isSync) process.nextTick(end);
+        if (isSync) setTimeout(end, 0);
         else end();
     }
 
