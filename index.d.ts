@@ -35,6 +35,7 @@ interface TextfitProps extends HTMLAttributes<HTMLDivElement> {
      */
     onReady?: (finalFontSize: number) => void;
     children: ReactNode;
+    ref: any;
 }
 
 /**
@@ -48,7 +49,4 @@ interface TextfitProps extends HTMLAttributes<HTMLDivElement> {
  * works with **any style** configuration (line-height, padding, ...)
  * **[check out the demo](http://malte-wessel.github.io/react-textfit/)**
  */
-type Textfit = (props: TextfitProps) => JSX.Element;
-
-export { Textfit };
-export default Textfit;
+export function Textfit(props: TextfitProps): JSX.Element;

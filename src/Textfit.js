@@ -7,13 +7,11 @@ import uniqueId from './utils/uniqueId';
 import { innerWidth, innerHeight } from './utils/innerSize';
 
 function assertElementFitsWidth(el, width) {
-    // -1: temporary bugfix, will be refactored soon
-    return el.scrollWidth - 1 <= width;
+    return el.scrollWidth <= width;
 }
 
 function assertElementFitsHeight(el, height) {
-    // -1: temporary bugfix, will be refactored soon
-    return el.scrollHeight - 1 <= height;
+    return el.scrollHeight <= height;
 }
 
 function noop() {}
@@ -154,7 +152,7 @@ export default class TextFit extends React.Component {
             stepCallback => {
                 // We break the previous loop without updating mid for the final time,
                 // so we do it here:
-                mid = Math.min(low, high);
+                mid = Math.min(low, high) - 1;
 
                 // Ensure we hit the user-supplied limits
                 mid = Math.max(mid, min);
