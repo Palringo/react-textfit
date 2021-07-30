@@ -7,11 +7,11 @@ import uniqueId from './utils/uniqueId';
 import { innerWidth, innerHeight } from './utils/innerSize';
 
 function assertElementFitsWidth(el, width) {
-    return el.scrollWidth <= width;
+    return el.scrollWidth / width;
 }
 
 function assertElementFitsHeight(el, height) {
-    return el.scrollHeight <= height;
+    return el.scrollHeight / height;
 }
 
 function noop() {}
@@ -100,7 +100,10 @@ export default class TextFit extends React.Component {
             ? () => assertElementFitsWidth(wrapper, originalWidth)
             : () => assertElementFitsHeight(wrapper, originalHeight);
 
+        const fontSize = this.state.fontSize;
         let mid;
+        let proportion;
+        let proportionUsed = 0;
         let low = min;
         let high = max;
 
@@ -113,10 +116,21 @@ export default class TextFit extends React.Component {
                 () => low <= high,
                 whilstCallback => {
                     if (shouldCancelProcess()) return whilstCallback(true);
-                    mid = parseInt((low + high) / 2, 10);
+                    if (proportionUsed >= 2) {
+                        mid = Math.floor((low + high) / 2);
+                    } else {
+                        if (proportionUsed === 0) {
+                            mid = fontSize;
+                        } else {
+                            mid = Math.floor(mid / proportion);
+                        }
+                        proportionUsed += 1;
+                    }
                     this.setState({ fontSize: mid }, () => {
                         if (shouldCancelProcess()) return whilstCallback(true);
-                        if (testPrimary()) low = mid + 1;
+                        proportion = testPrimary();
+                        if (proportion === 1) low = high = mid;
+                        else if (proportion <= 1) low = mid + 1;
                         else high = mid - 1;
                         return whilstCallback();
                     });
@@ -132,14 +146,23 @@ export default class TextFit extends React.Component {
                 if (testSecondary()) return stepCallback();
                 low = min;
                 high = mid;
+                mid = undefined;
+                proportionUsed = 0;
                 return whilst(
                     () => low <= high,
                     whilstCallback => {
                         if (shouldCancelProcess()) return whilstCallback(true);
-                        mid = parseInt((low + high) / 2, 10);
+                        if (mid === undefined || proportionUsed >= 1) {
+                            mid = Math.floor((low + high) / 2);
+                        } else {
+                            mid = Math.floor(mid / proportion);
+                            proportionUsed += 1;
+                        }
                         this.setState({ fontSize: mid }, () => {
                             if (pid !== this.pid) return whilstCallback(true);
-                            if (testSecondary()) low = mid + 1;
+                            proportion = testSecondary();
+                            if (proportion === 1) low = high = mid;
+                            else if (proportion <= 1) low = mid + 1;
                             else high = mid - 1;
                             return whilstCallback();
                         });
