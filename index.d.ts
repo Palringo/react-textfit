@@ -22,7 +22,7 @@ interface TextfitProps extends HTMLAttributes<HTMLDivElement> {
 
     /**
      * (Boolean) When mode is single and forceSingleModeWidth is true, the element's height will be ignored.
-     * Default is true.
+     * Default is false.
      */
     forceSingleModeWidth?: boolean;
 

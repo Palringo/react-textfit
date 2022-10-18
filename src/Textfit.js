@@ -23,8 +23,8 @@ export default class TextFit extends React.Component {
     static defaultProps = {
         min: 1,
         max: 100,
-        mode: 'multi',
-        forceSingleModeWidth: true,
+        mode: 'single',
+        forceSingleModeWidth: false,
         throttle: 50,
         autoResize: true,
         onReady: noop,
