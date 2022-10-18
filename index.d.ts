@@ -16,13 +16,13 @@ interface TextfitProps extends HTMLAttributes<HTMLDivElement> {
 
     /**
      *  (single|multi) Algorithm to fit the text. Use single for headlines and multi for paragraphs.
-     *  Default is single.
+     *  Default is multi.
      */
     mode?: 'multi' | 'single';
 
     /**
      * (Boolean) When mode is single and forceSingleModeWidth is true, the element's height will be ignored.
-     * Default is false.
+     * Default is true.
      */
     forceSingleModeWidth?: boolean;
 

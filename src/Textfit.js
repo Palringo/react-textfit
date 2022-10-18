@@ -1,6 +1,3 @@
-/* eslint-disable no-magic-numbers */
-/* eslint-disable consistent-return */
-/* eslint-disable no-undefined */
 import React from 'react';
 import shallowEqual from './utils/shallowEqual';
 import series from './utils/series';
@@ -23,8 +20,8 @@ export default class TextFit extends React.Component {
     static defaultProps = {
         min: 1,
         max: 100,
-        mode: 'single',
-        forceSingleModeWidth: false,
+        mode: 'multi',
+        forceSingleModeWidth: true,
         throttle: 50,
         autoResize: true,
         onReady: noop,
@@ -32,6 +29,9 @@ export default class TextFit extends React.Component {
 
     constructor(props) {
         super(props);
+        if ('perfectFit' in props) {
+            console.warn('TextFit property perfectFit has been removed.');
+        }
 
         this.handleWindowResize = throttle(this.handleWindowResize, props.throttle);
     }
@@ -101,7 +101,6 @@ export default class TextFit extends React.Component {
             () => assertElementFitsWidth(wrapper, originalWidth) :
             () => assertElementFitsHeight(wrapper, originalHeight);
 
-        const fontSize = this.state.fontSize;
         let mid;
         let proportion;
         let proportionUsed = 0;
@@ -117,20 +116,17 @@ export default class TextFit extends React.Component {
                 () => low <= high,
                 (whilstCallback) => {
                     if (shouldCancelProcess()) { return whilstCallback(true); }
-                    if (proportionUsed >= 2) {
+                    if (mid === undefined || proportionUsed >= 1) {
                         mid = Math.floor((low + high) / 2);
                     } else {
-                        if (proportionUsed === 0) {
-                            mid = fontSize;
-                        } else {
-                            mid = Math.floor(mid / proportion);
-                        }
+                        mid = Math.floor(mid / proportion);
                         proportionUsed = proportionUsed + 1;
                     }
                     this.setState({ fontSize: mid }, () => {
                         if (shouldCancelProcess()) { return whilstCallback(true); }
                         proportion = testPrimary();
-                        if (proportion === 1) { low = high = mid; } else if (proportion <= 1) { low = mid + 1; } else { high = mid - 1; }
+                        if (proportion === 1) { low = high = mid; }
+                        if (proportion <= 1) { low = mid + 1; } else { high = mid - 1; }
                         return whilstCallback();
                     });
                 },
@@ -143,7 +139,7 @@ export default class TextFit extends React.Component {
             // in order to not fit the elements height and decrease the width
             (stepCallback) => {
                 if (mode === 'single' && forceSingleModeWidth) { return stepCallback(); }
-                if (testSecondary()) { return stepCallback(); }
+                if (testSecondary() <= 1) { return stepCallback(); }
                 low = min;
                 high = mid;
                 mid = undefined;
@@ -161,7 +157,8 @@ export default class TextFit extends React.Component {
                         this.setState({ fontSize: mid }, () => {
                             if (pid !== this.pid) { return whilstCallback(true); }
                             proportion = testSecondary();
-                            if (proportion === 1) { low = high = mid; } else if (proportion <= 1) { low = mid + 1; } else { high = mid - 1; }
+                            if (proportion === 1) { low = high = mid; }
+                            if (proportion <= 1) { low = mid + 1; } else { high = mid - 1; }
                             return whilstCallback();
                         });
                     },
@@ -210,21 +207,25 @@ export default class TextFit extends React.Component {
             onReady,
             ...props
         } = this.props;
+        const { fontSize, ready } = this.state;
         const finalStyle = {
             ...style,
-            fontSize: this.state.fontSize,
+            fontSize,
         };
 
         const wrapperStyle = {
-            display: this.state.ready ? 'block' : 'inline-block',
-            whiteSpace: mode === 'single' ? 'nowrap' : '',
+            display: ready ? 'block' : 'inline-block',
         };
+        if (mode === 'single') { wrapperStyle.whiteSpace = 'nowrap'; }
 
         return (
             <div ref={(c) => this._parent = c} style={finalStyle} {...props}>
                 <div ref={(c) => this._child = c} style={wrapperStyle}>
-                    {
-                        text && typeof children === 'function' ? this.state.ready ? children(text) : text : children
+                    {text && typeof children === 'function' ?
+                        ready ?
+                            children(text) :
+                            text :
+                        children
                     }
                 </div>
             </div>
