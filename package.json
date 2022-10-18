@@ -1,8 +1,10 @@
 {
   "name": "@palringo/react-textfit",
-  "version": "1.0.0-test3",
+  "version": "1.0.0-test13",
   "description": "React component to fit headlines and paragraphs into any element",
   "main": "index.js",
+  "files": [ "index.js", "lib" ],
+  "types": "index.d.ts",
   "engines": {
     "node": ">=12.22.2"
   },
@@ -10,7 +12,8 @@
     "style": "./node_modules/.bin/eslint -c ./node_modules/@palringo/eslint-config/.eslintrc.json ./ --ext .js --fix --ignore-pattern /docs",
     "pretest": "./node_modules/.bin/eslint -c ./node_modules/@palringo/eslint-config/.eslintrc.json ./ --ext .js --ignore-pattern /docs",
     "test": "NODE_ENV=test mocha --delay --exit --recursive ./test",
-    "preversion": "npm test"
+    "preversion": "npm test",
+    "build": "babel src --out-dir lib"
   },
   "repository": {
     "type": "git",
@@ -47,7 +50,14 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "webpack": "^5.74.0",
-    "webpack-dev-server": "^4.11.1"
+    "webpack-dev-server": "^4.11.1",
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-eslint": "^10.1.0",
+    "babel-loader": "^8.2.5",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1"
   },
   "publishConfig": {
     "registry": "https://palringo-677619093471.d.codeartifact.eu-west-1.amazonaws.com/npm/npmjs/"

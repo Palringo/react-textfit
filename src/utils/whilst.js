@@ -1,10 +1,4 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.default = whilst;
-var noop = function noop() {};
+const noop = () => {};
 
 /**
  * Repeatedly call fn, while test returns true. Calls callback when stopped, or an error occurs.
@@ -14,15 +8,9 @@ var noop = function noop() {};
  * @param {Function} callback A callback which is called after the test fails and repeated execution of fn has stopped.
  */
 
-function whilst(test, iterator) {
-    var callback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : noop;
-
+export default function whilst(test, iterator, callback = noop) {
     if (test()) {
-        iterator(function next(err) {
-            for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-                args[_key - 1] = arguments[_key];
-            }
-
+        iterator(function next(err, ...args) {
             if (err) {
                 callback(err);
             } else if (test.apply(this, args)) {

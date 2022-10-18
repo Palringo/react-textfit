@@ -1,9 +1,3 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.default = throttle;
 /**
  * Returns a new function that, when invoked, invokes `func` at most once per `wait` milliseconds.
  * Taken from https://github.com/component/throttle v1.0.0
@@ -13,12 +7,12 @@ exports.default = throttle;
  * @return {Function} A new function that wraps the `func` function passed in.
  */
 
-function throttle(func, wait) {
-    var ctx = void 0;
-    var args = void 0;
-    var rtn = void 0;
-    var timeoutID = void 0;
-    var last = 0;
+export default function throttle(func, wait) {
+    let ctx;
+    let args;
+    let rtn;
+    let timeoutID;
+    let last = 0;
 
     function call() {
         timeoutID = 0;
@@ -31,13 +25,9 @@ function throttle(func, wait) {
     return function throttled() {
         ctx = this;
         args = arguments;
-        var delta = new Date() - last;
+        const delta = new Date() - last;
         if (!timeoutID) {
-            if (delta >= wait) {
-                call();
-            } else {
-                timeoutID = setTimeout(call, wait - delta);
-            }
+            if (delta >= wait) { call(); } else { timeoutID = setTimeout(call, wait - delta); }
         }
         return rtn;
     };
