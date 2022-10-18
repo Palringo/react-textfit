@@ -24,7 +24,7 @@ export default class TextFit extends React.Component {
         forceSingleModeWidth: true,
         throttle: 50,
         autoResize: true,
-        onReady: noop
+        onReady: noop,
     }
 
     constructor(props) {
@@ -38,7 +38,7 @@ export default class TextFit extends React.Component {
 
     state = {
         fontSize: null,
-        ready: false
+        ready: false,
     }
 
     componentDidMount() {
@@ -51,8 +51,8 @@ export default class TextFit extends React.Component {
 
     componentDidUpdate(prevProps) {
         const { ready } = this.state;
-        if (!ready) return;
-        if (shallowEqual(this.props, prevProps)) return;
+        if (!ready) { return; }
+        if (shallowEqual(this.props, prevProps)) { return; }
         this.process();
     }
 
@@ -61,6 +61,7 @@ export default class TextFit extends React.Component {
         if (autoResize) {
             window.removeEventListener('resize', this.handleWindowResize);
         }
+
         // Setting a new pid will cancel all running processes
         this.pid = uniqueId();
     }
@@ -92,87 +93,82 @@ export default class TextFit extends React.Component {
 
         const shouldCancelProcess = () => pid !== this.pid;
 
-        const testPrimary = mode === 'multi'
-            ? () => assertElementFitsHeight(wrapper, originalHeight)
-            : () => assertElementFitsWidth(wrapper, originalWidth);
+        const testPrimary = mode === 'multi' ?
+            () => assertElementFitsHeight(wrapper, originalHeight) :
+            () => assertElementFitsWidth(wrapper, originalWidth);
 
-        const testSecondary = mode === 'multi'
-            ? () => assertElementFitsWidth(wrapper, originalWidth)
-            : () => assertElementFitsHeight(wrapper, originalHeight);
+        const testSecondary = mode === 'multi' ?
+            () => assertElementFitsWidth(wrapper, originalWidth) :
+            () => assertElementFitsHeight(wrapper, originalHeight);
 
-        const fontSize = this.state.fontSize;
         let mid;
         let proportion;
         let proportionUsed = 0;
         let low = min;
         let high = max;
 
-        this.setState({ ready: false});
+        this.setState({ ready: false });
 
         series([
             // Step 1:
             // Binary search to fit the element's height (multi line) / width (single line)
-            stepCallback => whilst(
+            (stepCallback) => whilst(
                 () => low <= high,
-                whilstCallback => {
-                    if (shouldCancelProcess()) return whilstCallback(true);
-                    if (proportionUsed >= 2) {
+                (whilstCallback) => {
+                    if (shouldCancelProcess()) { return whilstCallback(true); }
+                    if (mid === undefined || proportionUsed >= 1) {
                         mid = Math.floor((low + high) / 2);
                     } else {
-                        if (proportionUsed === 0) {
-                            mid = fontSize;
-                        } else {
-                            mid = Math.floor(mid / proportion);
-                        }
-                        proportionUsed += 1;
+                        mid = Math.floor(mid / proportion);
+                        proportionUsed = proportionUsed + 1;
                     }
                     this.setState({ fontSize: mid }, () => {
-                        if (shouldCancelProcess()) return whilstCallback(true);
+                        if (shouldCancelProcess()) { return whilstCallback(true); }
                         proportion = testPrimary();
-                        if (proportion === 1) low = high = mid;
-                        else if (proportion <= 1) low = mid + 1;
-                        else high = mid - 1;
+                        if (proportion === 1) { low = high = mid; }
+                        if (proportion <= 1) { low = mid + 1; } else { high = mid - 1; }
                         return whilstCallback();
                     });
                 },
-                stepCallback
+                stepCallback,
             ),
+
             // Step 2:
             // Binary search to fit the element's width (multi line) / height (single line)
             // If mode is single and forceSingleModeWidth is true, skip this step
             // in order to not fit the elements height and decrease the width
-            stepCallback => {
-                if (mode === 'single' && forceSingleModeWidth) return stepCallback();
-                if (testSecondary()) return stepCallback();
+            (stepCallback) => {
+                if (mode === 'single' && forceSingleModeWidth) { return stepCallback(); }
+                if (testSecondary() <= 1) { return stepCallback(); }
                 low = min;
                 high = mid;
                 mid = undefined;
                 proportionUsed = 0;
                 return whilst(
                     () => low <= high,
-                    whilstCallback => {
-                        if (shouldCancelProcess()) return whilstCallback(true);
+                    (whilstCallback) => {
+                        if (shouldCancelProcess()) { return whilstCallback(true); }
                         if (mid === undefined || proportionUsed >= 1) {
                             mid = Math.floor((low + high) / 2);
                         } else {
                             mid = Math.floor(mid / proportion);
-                            proportionUsed += 1;
+                            proportionUsed = proportionUsed + 1;
                         }
                         this.setState({ fontSize: mid }, () => {
-                            if (pid !== this.pid) return whilstCallback(true);
+                            if (pid !== this.pid) { return whilstCallback(true); }
                             proportion = testSecondary();
-                            if (proportion === 1) low = high = mid;
-                            else if (proportion <= 1) low = mid + 1;
-                            else high = mid - 1;
+                            if (proportion === 1) { low = high = mid; }
+                            if (proportion <= 1) { low = mid + 1; } else { high = mid - 1; }
                             return whilstCallback();
                         });
                     },
-                    stepCallback
+                    stepCallback,
                 );
             },
+
             // Step 3
             // Limits
-            stepCallback => {
+            (stepCallback) => {
                 // We break the previous loop without updating mid for the final time,
                 // so we do it here:
                 mid = Math.min(low, high) - 1;
@@ -184,12 +180,12 @@ export default class TextFit extends React.Component {
                 // Sanity check:
                 mid = Math.max(mid, 0);
 
-                if (shouldCancelProcess()) return stepCallback(true);
+                if (shouldCancelProcess()) { return stepCallback(true); }
                 this.setState({ fontSize: mid }, stepCallback);
-            }
-        ], err => {
+            },
+        ], (err) => {
             // err will be true, if another process was triggered
-            if (err || shouldCancelProcess()) return;
+            if (err || shouldCancelProcess()) { return; }
             this.setState({ ready: true }, () => onReady(mid));
         });
     }
@@ -214,22 +210,22 @@ export default class TextFit extends React.Component {
         const { fontSize, ready } = this.state;
         const finalStyle = {
             ...style,
-            fontSize: fontSize
+            fontSize,
         };
 
         const wrapperStyle = {
-            display: ready ? 'block' : 'inline-block'
+            display: ready ? 'block' : 'inline-block',
         };
-        if (mode === 'single') wrapperStyle.whiteSpace = 'nowrap';
+        if (mode === 'single') { wrapperStyle.whiteSpace = 'nowrap'; }
 
         return (
-            <div ref={c => this._parent = c} style={finalStyle} {...props}>
-                <div ref={c => this._child = c} style={wrapperStyle}>
-                    {text && typeof children === 'function'
-                        ? ready
-                            ? children(text)
-                            : text
-                        : children
+            <div ref={(c) => this._parent = c} style={finalStyle} {...props}>
+                <div ref={(c) => this._child = c} style={wrapperStyle}>
+                    {text && typeof children === 'function' ?
+                        ready ?
+                            children(text) :
+                            text :
+                        children
                     }
                 </div>
             </div>

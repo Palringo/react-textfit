@@ -1,35 +1,42 @@
-import { HTMLAttributes, ReactNode } from "react";
+import { HTMLAttributes, ReactNode } from 'react';
 
 interface TextfitProps extends HTMLAttributes<HTMLDivElement> {
+
     /**
      * Minimum value for interpolation
      * Default: 1
      */
     min?: number;
+
     /**
      * Maximum value for interpolation
      * Default 100
      */
     max?: number;
+
     /**
      *  (single|multi) Algorithm to fit the text. Use single for headlines and multi for paragraphs.
      *  Default is multi.
      */
-    mode?: "multi" | "single";
+    mode?: 'multi' | 'single';
+
     /**
      * (Boolean) When mode is single and forceSingleModeWidth is true, the element's height will be ignored.
      * Default is true.
      */
     forceSingleModeWidth?: boolean;
+
     /**
      * (Number) Window resize throttle in milliseconds. Default is 50.
      */
     throttle?: number;
+
     /**
      * Auto resize. Adds a listener to the window if true to detect changes.
      * Default: false
      */
     autoResize?: boolean;
+
     /**
      * (Function) Will be called when text is fitted.
      */
